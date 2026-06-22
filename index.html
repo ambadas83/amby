@@ -1,62 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>AMBY</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
 body{
-    margin:0;
-    background:#0F1115;
-    color:#fff;
-    font-family:Arial,sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    text-align:center;
+background:#0F1115;
+color:#fff;
+font-family:'Inter',sans-serif;
+padding:30px;
 }
 
-.container{
-    max-width:700px;
-    padding:40px;
+.header{
+text-align:center;
+margin-bottom:40px;
 }
 
-h1{
-    font-size:80px;
-    margin-bottom:10px;
+.logo{
+font-size:60px;
+font-weight:800;
 }
 
-p{
-    color:#A1A1AA;
-    font-size:22px;
+.tagline{
+color:#A1A1AA;
+margin-top:10px;
 }
 
-.tag{
-    color:#D4AF37;
-    margin-top:20px;
-    font-size:18px;
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:20px;
+margin-bottom:40px;
+}
+
+.card{
+background:#171A21;
+padding:25px;
+border-radius:18px;
+text-align:center;
+}
+
+.card h2{
+font-size:42px;
+}
+
+.card p{
+color:#A1A1AA;
+margin-top:10px;
+}
+
+.feed{
+display:grid;
+gap:15px;
+}
+
+.feed-item{
+background:#171A21;
+padding:20px;
+border-radius:16px;
+}
+
+.award{
+color:#D4AF37;
+font-weight:700;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
+<div class="header">
+<div class="logo">AMBY</div>
+<div class="tagline">
+Tracking Creativity Worldwide
+</div>
+</div>
 
-<h1>AMBY</h1>
+<div class="stats">
 
-<p>Tracking Creativity Worldwide</p>
+<div class="card">
+<h2 id="totalAwards">0</h2>
+<p>Total Awards</p>
+</div>
 
-<div class="tag">
-Coming Soon
+<div class="card">
+<h2 id="goldAwards">0</h2>
+<p>Gold</p>
+</div>
+
+<div class="card">
+<h2 id="silverAwards">0</h2>
+<p>Silver</p>
+</div>
+
+<div class="card">
+<h2 id="bronzeAwards">0</h2>
+<p>Bronze</p>
 </div>
 
 </div>
+
+<h2 style="margin-bottom:20px;">Live Feed</h2>
+
+<div class="feed" id="feed"></div>
+
+<script>
+
+const sheetURL =
+'https://opensheet.elk.sh/15vLafkmdQXueHBTb7ks9xG640MI2Ds8tedRYlIveU9s/Sheet1';
+
+fetch(sheetURL)
+.then(res=>res.json())
+.then(data=>{
+
+document.getElementById('totalAwards').innerText =
+data.length;
+
+document.getElementById('goldAwards').innerText =
+data.filter(x=>x.Award==="Gold").length;
+
+document.getElementById('silverAwards').innerText =
+data.filter(x=>x.Award==="Silver").length;
+
+document.getElementById('bronzeAwards').innerText =
+data.filter(x=>x.Award==="Bronze").length;
+
+const feed=document.getElementById('feed');
+
+data.reverse().forEach(item=>{
+
+feed.innerHTML += `
+<div class="feed-item">
+<h3>${item.Agency}</h3>
+<p>${item.Brand}</p>
+<p class="award">${item.Award}</p>
+</div>
+`;
+
+});
+
+});
+
+</script>
 
 </body>
 </html>
