@@ -71,6 +71,24 @@ background:#171A21;
 padding:20px;
 border-radius:16px;
 }
+  button{
+background:#171A21;
+color:white;
+border:none;
+padding:10px 16px;
+border-radius:10px;
+cursor:pointer;
+}
+
+button:hover{
+background:#252B38;
+}
+
+.rank{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 
 .award{
 color:#D4AF37;
@@ -112,47 +130,174 @@ Tracking Creativity Worldwide
 </div>
 
 </div>
+<h2 style="margin-bottom:15px;">Agency Leaderboard</h2>
 
+<div id="leaderboard" class="feed"></div>
+
+<br>
+
+<input
+id="search"
+type="text"
+placeholder="Search Agency, Brand or Campaign"
+style="
+width:100%;
+padding:15px;
+border:none;
+border-radius:12px;
+background:#171A21;
+color:white;
+margin-bottom:20px;
+font-size:16px;
+">
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px;">
+<button onclick="filterAwards('All')">All</button>
+<button onclick="filterAwards('Gold')">Gold</button>
+<button onclick="filterAwards('Silver')">Silver</button>
+<button onclick="filterAwards('Bronze')">Bronze</button>
+</div>
 <h2 style="margin-bottom:20px;">Live Feed</h2>
 
 <div class="feed" id="feed"></div>
 
 <script>
-
 const sheetURL =
 'https://opensheet.elk.sh/15vLafkmdQXueHBTb7ks9xG640MI2Ds8tedRYlIveU9s/Sheet1';
+
+let awards=[];
 
 fetch(sheetURL)
 .then(res=>res.json())
 .then(data=>{
 
-document.getElementById('totalAwards').innerText =
-data.length;
+awards=data;
 
-document.getElementById('goldAwards').innerText =
+renderDashboard(data);
+
+});
+
+function renderDashboard(data){
+
+document.getElementById('totalAwards').innerText=data.length;
+
+document.getElementById('goldAwards').innerText=
 data.filter(x=>x.Award==="Gold").length;
 
-document.getElementById('silverAwards').innerText =
+document.getElementById('silverAwards').innerText=
 data.filter(x=>x.Award==="Silver").length;
 
-document.getElementById('bronzeAwards').innerText =
+document.getElementById('bronzeAwards').innerText=
 data.filter(x=>x.Award==="Bronze").length;
+
+renderFeed(data);
+renderLeaderboard(data);
+
+}
+
+function renderLeaderboard(data){
+
+let agencyCount={};
+
+data.forEach(item=>{
+
+agencyCount[item.Agency]=
+(agencyCount[item.Agency]||0)+1;
+
+});
+
+let sorted=
+Object.entries(agencyCount)
+.sort((a,b)=>b[1]-a[1]);
+
+let html='';
+
+sorted.forEach((agency,index)=>{
+
+html += `
+
+<div class="feed-item">
+<div class="rank">
+<h3>${index+1}. ${agency[0]}</h3>
+<strong>${agency[1]}</strong>
+</div>
+</div>
+`;
+
+});
+
+document.getElementById('leaderboard').innerHTML=html;
+
+}
+
+function renderFeed(data){
 
 const feed=document.getElementById('feed');
 
-data.reverse().forEach(item=>{
+feed.innerHTML='';
+
+data.slice().reverse().forEach(item=>{
+
+let medal='🏆';
+
+if(item.Award==="Gold") medal='🥇';
+if(item.Award==="Silver") medal='🥈';
+if(item.Award==="Bronze") medal='🥉';
 
 feed.innerHTML += `
+
 <div class="feed-item">
-<h3>${item.Agency}</h3>
-<p>${item.Brand}</p>
+<h3>${medal} ${item.Agency}</h3>
+<p><strong>Brand:</strong> ${item.Brand}</p>
+<p><strong>Campaign:</strong> ${item.Campaign}</p>
+<p><strong>Category:</strong> ${item.Category}</p>
 <p class="award">${item.Award}</p>
 </div>
 `;
 
 });
 
+}
+
+document.addEventListener('input',(e)=>{
+
+if(e.target.id==='search'){
+
+let term=e.target.value.toLowerCase();
+
+let filtered=awards.filter(item=>
+
+item.Agency.toLowerCase().includes(term) ||
+item.Brand.toLowerCase().includes(term) ||
+item.Campaign.toLowerCase().includes(term)
+
+);
+
+renderFeed(filtered);
+
+}
+
 });
+
+function filterAwards(type){
+
+if(type==='All'){
+
+renderFeed(awards);
+return;
+
+}
+
+let filtered=
+awards.filter(item=>item.Award===type);
+
+renderFeed(filtered);
+
+}
+
+setInterval(()=>{
+location.reload();
+},30000);
 
 </script>
 
